@@ -13,19 +13,19 @@ df = spark.read.option("delimiter", "\n").csv(
 
 # COMMAND ----------
 
-df.display()
+df.limit(10).display()
 
 # COMMAND ----------
 
 from pyspark.sql.functions import col, regexp_replace
 
 df = df.withColumn("show_id", regexp_replace(col("show_id"), "\,", "|"))
-df.display()
+df.limit(10).display()
 
 # COMMAND ----------
 
 df = df.withColumn("show_id", regexp_replace(col("show_id"), r"\\\|", ","))
-df.display()
+df.limit(10).display()
 
 # COMMAND ----------
 
@@ -41,7 +41,7 @@ for i in range(12):
 # Drop the original show_id column and the intermediate split_value column
 df_final = df_split.drop("show_id", "split_value")
 
-df_final.display()
+df_final.limit(10).display()
 
 # COMMAND ----------
 
@@ -61,7 +61,7 @@ df_final.withColumnsRenamed(
         "col11": "listed_in",
         "col12": "description",
     }
-).display()
+).limit(10).display()
 
 # COMMAND ----------
 
@@ -80,7 +80,7 @@ df_final = (
     .withColumnRenamed("col11", "listed_in")
     .withColumnRenamed("col12", "description")
 )
-df_final.display()
+df_final.limit(10).display()
 
 # COMMAND ----------
 
@@ -96,4 +96,4 @@ print(formatted_date)
 
 # COMMAND ----------
 
-df_final.write.format("delta").save(f"/mnt/zip-files/bronze_netflix/{formatted_date}")
+df_final.write.mode("overwrite").format("delta").save(f"/mnt/zip-files/bronze_netflix/{formatted_date}")
