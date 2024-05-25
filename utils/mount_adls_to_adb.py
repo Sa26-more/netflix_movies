@@ -65,6 +65,26 @@ else:
 
 # COMMAND ----------
 
+application_id = dbutils.secrets.get('adb-scope','kv-application-id')
+directory_id = dbutils.secrets.get('adb-scope','kv-directory-id')
+service_credential = dbutils.secrets.get('adb-scope','kv-service-credential')
+
+configs = {"fs.azure.account.auth.type": "OAuth",
+          "fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+          "fs.azure.account.oauth2.client.id": application_id,
+          "fs.azure.account.oauth2.client.secret": service_credential,
+          "fs.azure.account.oauth2.client.endpoint": f"https://login.microsoftonline.com/{directory_id}/oauth2/token"}
+
+if not any(mount.mountPoint == "/mnt/unloading-snowflake" for mount in dbutils.fs.mounts()):
+    dbutils.fs.mount(
+    source = "abfss://unloading-snowflake@practiceadb.dfs.core.windows.net/",
+    mount_point = "/mnt/unloading-snowflake",
+    extra_configs = configs)
+else:
+    print(f"Mount point '/mnt/unloading-snowflake' already exists")
+
+# COMMAND ----------
+
 dbutils.fs.ls('/mnt')
 
 # COMMAND ----------
